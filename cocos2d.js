@@ -39,7 +39,7 @@
         appFiles:[
             'src/resource.js',
             'src/maingame.js',//add your own files in order here
-            
+            'src/intro.js'
         ]
     };
     window.addEventListener('DOMContentLoaded', function () {

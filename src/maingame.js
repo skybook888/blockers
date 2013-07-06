@@ -135,6 +135,10 @@ var gamescene =cc.Layer.extend({
 		this.menu.setEnabled(true);
 		this.backgroud.setPosition(cc.p(0, 0));
 		this.adjustSizeForWindow();
+		window.addEventListener("resize", function (event) {
+            selfPointer.adjustSizeForWindow();
+        });
+        return true;
 	},
 	adjustSizeForWindow:function () {
 		var margin = document.documentElement.clientWidth - document.body.clientWidth;
