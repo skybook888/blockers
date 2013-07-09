@@ -1,3 +1,9 @@
+var colorr=new Array(0,255,255,0,255,0,0);
+var colorg=new Array(0,0,255,255,0,0,255);
+var colorb=new Array(0,255,0,255,0,255,0);
+var labeltext=new Array("A","B","C","D","E","F","G","H","I");
+var labelsymbol=new Array("★","♣","♥","♦","♠","☀","▲","●","⚑");
+var labelsymbolcover=new Array("☆","♧","♡","♢","♤","☼","△","○","⚐");
 var introScene = cc.Scene.extend({
 	onEnter:function () {
 		this._super();
@@ -23,9 +29,9 @@ var introscene =cc.Layer.extend({
 		// ask director the window size
 		var size = cc.Director.getInstance().getWinSize();
 		this.title=cc.LabelTTF.create("BLOCKERS", "Black", 65);
-		this.addChild(this.title);
+		this.addChild(this.title,100);
 		this.title.setPosition(cc.p(size.width/2,size.height*0.75));
-		var startlabel= cc.LabelTTF.create("start", "Black", 40);
+		var startlabel= cc.LabelTTF.create("start", "Black", 80);
 		this.start=cc.MenuItemLabel.create(
 				startlabel,
 				function(){
@@ -40,12 +46,22 @@ var introscene =cc.Layer.extend({
 				this
 		);
 		this.menu =cc.Menu.create(this.start);
-		this.addChild(this.menu);
+		this.addChild(this.menu,100);
 		this.adjustSizeForWindow();
+		this.schedule(this.createMovingBlockers, 1 / 4);
 		window.addEventListener("resize", function (event) {
             selfPointer.adjustSizeForWindow();
         });
         return true;
+	},
+	createMovingBlockers:function(){
+		var blocker=new blocksprite(labelsymbol[Math.floor(Math.random()*9)],Math.floor(Math.random()*5)+1);	
+		var size = cc.Director.getInstance().getWinSize();
+		this.addChild(blocker,0);
+		var startwidth=Math.floor(Math.random()*size.width);
+		blocker.setPosition(cc.p(startwidth,size.height+100));
+		var moveon = cc.MoveTo.create(2,cc.p(Math.floor(Math.random()*size.width),-100));
+		blocker.runAction(cc.Sequence.create(moveon,cc.CallFunc.create(function(){this.removeFromParent(true);},blocker)));
 	},
 	adjustSizeForWindow:function () {
 		var margin = document.documentElement.clientWidth - document.body.clientWidth;
@@ -75,6 +91,7 @@ var introscene =cc.Layer.extend({
 		cc.renderContext.translate(0, cc.canvas.height);
 		cc.renderContext.scale(xScale, xScale);
 		cc.Director.getInstance().setContentScaleFactor(xScale);
+		
 		//cc.canvas.webkitRequestFullScreen();
 	},
 	

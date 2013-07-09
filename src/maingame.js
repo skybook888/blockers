@@ -26,38 +26,59 @@ var backSprite = cc.Sprite.extend({
     },
     
 });
+
+		
+var blocksprite = cc.Sprite.extend({
+	label:null,
+	colorlayer:null,
+	ctor:function(labelstr,colornum){
+		this._super();
+		var size = cc.Director.getInstance().getWinSize();
+		this.setAnchorPoint(cc.p(0.5,0.5));
+		this.colorlayer = cc.LayerColor.create(cc.c4b(colorr[colornum],colorg[colornum],colorb[colornum],255),size.width/11-10,size.width/11-10);
+		//this.colorlayer = cc.LayerColor.create(cc.c4b(0,0,0,255),size.width/11-10,size.width/11-10);
+		
+		//this.colorlayer.setAnchorPoint(cc.p(1,1));
+		this.label=cc.LabelTTF.create(labelstr,"Batang",45);
+		this.label.setPosition((size.width/11-10)/2,(size.width/11-10)/2);
+		if(colornum>0){
+			this.label.setColor(cc.c4b(0,0,0,255));
+		}else{
+			this.label.setColor(cc.c4b(255,255,255,255));
+		}
+		this.addChild(this.label,10);
+		this.addChild(this.colorlayer,-1);
+		
+	},
+	setcolor:function(colornum){
+		this.colorlayer.setColor(cc.c4b(colorr[colornum],colorg[colornum],colorb[colornum],255));
+		if(colornum>0){
+			this.label.setColor(cc.c4b(0,0,0,255));
+		}else{
+			this.label.setColor(cc.c4b(255,255,255,255));
+		}
+	},
+	setstring:function(labelstr){
+		this.label.setString(labelstr);
+	
+	}
+});
 var cellitem= cc.MenuItemSprite.extend({
 	player:0,
-	colorlayer:null,
-	label:null,
 	sprite:null,
 	ctor:function(labelstr){
 		this._super;
 		var size = cc.Director.getInstance().getWinSize();
 		this.setAnchorPoint(cc.p(0.5,0.5));
-		this.sprite=new cc.Sprite();
-		this.sprite.setAnchorPoint(cc.p(0.5,0.5));
-		this.colorlayer = cc.LayerColor.create(cc.c4b(0,0,0,255),size.width/11-10,size.width/11-10);
-		//this.colorlayer.setAnchorPoint(cc.p(1,1));
-		this.label=cc.LabelTTF.create(labelstr,"Batang",45);
-		this.label.setPosition((size.width/11-10)/2,(size.width/11-10)/2);
-		this.sprite.addChild(this.label,10);
-		this.sprite.addChild(this.colorlayer,-1);
-		//this.label.addChild(this.colorlayer,-1);
-		this.colorlayer.setPosition(0,0);
+		this.sprite=new blocksprite(labelstr,0);
 		this.setNormalImage(this.sprite);
 		this.setEnabled(true);
-		this.setContentSize(this.colorlayer.getContentSize());
+		this.setContentSize(this.sprite.colorlayer.getContentSize());
 		console.log(this.rect());
 	},
 	changeicon:function(player,labelstr){
-		var colorr=new Array(0,255,255,0,255,0,0);
-		var colorg=new Array(0,0,255,255,0,0,255);
-		var colorb=new Array(0,255,0,255,0,255,0);
-		this.colorlayer.setColor(cc.c4b(colorr[player],colorg[player],colorb[player],255));
-		this.colorlayer.draw();
-		if(player>0)this.label.setColor(cc.c4b(0,0,0,255));
-		this.label.setString(labelstr);
+		this.sprite.setcolor(player);
+		this.sprite.setstring(labelstr);
 	
 	}
 	
@@ -91,9 +112,7 @@ var gamescene =cc.Layer.extend({
 		labelleft=new Array();
 		labelright=new Array();
 		labelbottom=new Array();
-		labeltext=new Array("A","B","C","D","E","F","G","H","I");
-		labelsymbol=new Array("★","♣","♥","♦","♠","☀","▲","●","⚑");
-		labelsymbolcover=new Array("☆","♧","♡","♢","♤","☼","△","○","⚐");
+		
 		
 		this.addChild(this.backgroud,0);
 		for(var i=0;i<9;i++){
