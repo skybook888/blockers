@@ -1,9 +1,10 @@
-var colorr=new Array(0,255,255,0,255,0,0);
-var colorg=new Array(0,0,255,255,0,0,255);
-var colorb=new Array(0,255,0,255,0,255,0);
+var colorr=new Array(0,255,0,0,255,0,255);
+var colorg=new Array(0,0,255,0,255,255,0);
+var colorb=new Array(0,0,0,255,0,255,255);
+var fontsize=30;
 var labeltext=new Array("A","B","C","D","E","F","G","H","I");
-var labelsymbol=new Array("★","♣","♥","♦","♠","☀","▲","●","⚑");
-var labelsymbolcover=new Array("☆","♧","♡","♢","♤","☼","△","○","⚐");
+var labelsymbol=new Array("★","♣","♥","♦","♠","☀","▲","●","■");
+var labelsymbolcover=new Array("☆","♧","♡","♢","♤","☼","△","○","□");
 var introScene = cc.Scene.extend({
 	onEnter:function () {
 		this._super();
@@ -38,7 +39,7 @@ var introscene =cc.Layer.extend({
 					this.removeAllChildren(true);
 					mainScene=cc.Scene.create();
 					var layer = new gamescene();
-					layer.init();
+					layer.init(5);
 					mainScene.addChild(layer);
 					cc.Director.getInstance().pushScene(mainScene);
 				
@@ -55,8 +56,9 @@ var introscene =cc.Layer.extend({
         return true;
 	},
 	createMovingBlockers:function(){
-		var blocker=new blocksprite(labelsymbol[Math.floor(Math.random()*9)],Math.floor(Math.random()*5)+1);	
 		var size = cc.Director.getInstance().getWinSize();
+		var blocker=new blocksprite(labelsymbol[Math.floor(Math.random()*9)],Math.floor(Math.random()*5)+1,size);	
+		
 		this.addChild(blocker,0);
 		var startwidth=Math.floor(Math.random()*size.width);
 		blocker.setPosition(cc.p(startwidth,size.height+100));

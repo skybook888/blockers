@@ -1,3 +1,4 @@
+//
 var mainScene = cc.Scene.extend({
 	onEnter:function () {
 		this._super();
@@ -6,41 +7,94 @@ var mainScene = cc.Scene.extend({
 		this.addChild(layer);
 	}
 });
-//
+//设置整个棋盘的背景（白色条纹）
 var backSprite = cc.Sprite.extend({
     size:null,
     ctor:function (size) {
         this._super();
         this.size=size;
+        this.setContentSize(size);
+        //this.setTextureRect(cc.rect(0,0,size.height.size.weight))
         
     },
     draw:function () {
-        cc.renderContext.fillStyle = "rgba(255,255,255,5)";
-        cc.renderContext.strokeStyle = "rgba(255,255,255,5)";
-		cc.renderContext.lineWidth = 4;
+        cc.renderContext.fillStyle = "rgba(255,255,255,255)";
+        cc.renderContext.strokeStyle = "rgba(255,255,255,255)";
+		cc.renderContext.lineWidth = 2;
         for(var i=0;i<10;i++){
-        	cc.drawingUtil.drawLine(cc.p(this.size.width/11-2,this.size.height-this.size.width/11*(i+1)),cc.p(this.size.width/11*10+2,this.size.height-this.size.width/11*(i+1)));
-        	cc.drawingUtil.drawLine(cc.p(this.size.width/11*(i+1),this.size.height-this.size.width/11-2),cc.p(this.size.width/11*(i+1),this.size.height-this.size.width/11*10+2));
+        	cc.drawingUtil.drawLine(cc.p(this.size.width/11-1,this.size.height-this.size.width/11*(i+1)),cc.p(this.size.width/11*10+1,this.size.height-this.size.width/11*(i+1)));
+        	cc.drawingUtil.drawLine(cc.p(this.size.width/11*(i+1),this.size.height-this.size.width/11-1),cc.p(this.size.width/11*(i+1),this.size.height-this.size.width/11*10+1));
         
         }
     },
     
 });
+var scorelayer= cc.Layer.extend({
+	size:null,
+	player:0,
+	score:null,
+	blocks:null,
+	ctor:function(size,player){
+		this._super();
+		this.size=size;
+		this.setContentSize(size);
+		this.player=player;
+		var colorlayer=cc.LayerColor.create(get_player_color(player),size.height*0.4,size.height*0.4);
+		this.addChild(colorlayer);
+		colorlayer.setPosition(cc.p(10,size.height*0.6-10));
+		var blockslabel=cc.LabelTTF.create("blocks","Black",fontsize*0.5);
+		blockslabel.setColor(get_player_color(player));
+		this.addChild(blockslabel);
+		blockslabel.setPosition(size.width*0.55,size.height*0.75);
+		var scorelabel=cc.LabelTTF.create("score","Black",fontsize*0.5);
+		scorelabel.setColor(get_player_color(player));
+		this.addChild(scorelabel);
+		scorelabel.setPosition(size.width*0.55,size.height*0.55);
+		this.score=cc.LabelTTF.create(0,"Black",fontsize*0.55);
+		this.score.setColor(get_player_color(player));
+		this.addChild(this.score);
+		this.score.setPosition(size.width*0.85,size.height*0.55);
+		this.blocks=cc.LabelTTF.create(0,"Black",fontsize*0.55);
+		this.blocks.setColor(get_player_color(player));
+		this.addChild(this.blocks);
+		this.blocks.setPosition(size.width*0.85,size.height*0.75);
+	},
+	draw:function(){
+		cc.renderContext.fillStyle = "rgba(255,255,255,255)";
+        cc.renderContext.strokeStyle = "rgba(255,255,255,255)";
+		cc.renderContext.lineWidth = 1;
+		cc.drawingUtil.drawLine(cc.p(5,5),cc.p(5,this.size.height-5));
+		cc.drawingUtil.drawLine(cc.p(5,this.size.height-5),cc.p(this.size.width-5,this.size.height-5));
+		cc.drawingUtil.drawLine(cc.p(this.size.width-5,this.size.height-5),cc.p(this.size.width-5,5));
+		cc.drawingUtil.drawLine(cc.p(this.size.width-5,5),cc.p(5,5));
+		
+	
+	}
+	
+	
+
+
+});
+function get_player_color(player){
+	return cc.c4b(colorr[player],colorg[player],colorb[player],255);
+	
+
+
+}
 
 		
 var blocksprite = cc.Sprite.extend({
 	label:null,
 	colorlayer:null,
-	ctor:function(labelstr,colornum){
+	ctor:function(labelstr,colornum,size){
 		this._super();
-		var size = cc.Director.getInstance().getWinSize();
-		this.setAnchorPoint(cc.p(0.5,0.5));
-		this.colorlayer = cc.LayerColor.create(cc.c4b(colorr[colornum],colorg[colornum],colorb[colornum],255),size.width/11-10,size.width/11-10);
+		//this.setAnchorPoint(cc.p(0.5,0.5));
+		this.colorlayer = cc.LayerColor.create(get_player_color(colornum),size.width/11-5,size.width/11-5);
 		//this.colorlayer = cc.LayerColor.create(cc.c4b(0,0,0,255),size.width/11-10,size.width/11-10);
 		
 		//this.colorlayer.setAnchorPoint(cc.p(1,1));
-		this.label=cc.LabelTTF.create(labelstr,"Batang",45);
-		this.label.setPosition((size.width/11-10)/2,(size.width/11-10)/2);
+		this.label=cc.LabelTTF.create(labelstr,"Black",fontsize);
+		this.label.setPosition((size.width/11-5)/2,(size.width/11-5)/2);
 		if(colornum>0){
 			this.label.setColor(cc.c4b(0,0,0,255));
 		}else{
@@ -51,7 +105,7 @@ var blocksprite = cc.Sprite.extend({
 		
 	},
 	setcolor:function(colornum){
-		this.colorlayer.setColor(cc.c4b(colorr[colornum],colorg[colornum],colorb[colornum],255));
+		this.colorlayer.setColor(get_player_color(colornum));
 		if(colornum>0){
 			this.label.setColor(cc.c4b(0,0,0,255));
 		}else{
@@ -66,15 +120,16 @@ var blocksprite = cc.Sprite.extend({
 var cellitem= cc.MenuItemSprite.extend({
 	player:0,
 	sprite:null,
-	ctor:function(labelstr){
+	labstr:"",
+	ctor:function(labelstr,size){
 		this._super;
-		var size = cc.Director.getInstance().getWinSize();
 		this.setAnchorPoint(cc.p(0.5,0.5));
-		this.sprite=new blocksprite(labelstr,0);
+		this.sprite=new blocksprite(labelstr,0,size);
 		this.setNormalImage(this.sprite);
 		this.setEnabled(true);
 		this.setContentSize(this.sprite.colorlayer.getContentSize());
-		console.log(this.rect());
+		this.labelstr=labelstr;
+		//console.log(this.rect());
 	},
 	changeicon:function(player,labelstr){
 		this.sprite.setcolor(player);
@@ -92,12 +147,16 @@ var gamescene =cc.Layer.extend({
 	castle:null,
 	logo:null,
 	menu:null,
-	init:function () {
+	board:null,
+	scorelayers:null,
+	myblockscard:null,
+	remainblocks:null,
+	init:function (playnums) {
 		var selfPointer = this;
 		//////////////////////////////
 		// 1. super init first
 		this._super();
-		this.setAnchorPoint(cc.PointMake(0.5,0.5));
+		//this.setAnchorPoint(cc.PointMake(0.5,0.5));
 		this.removeAllChildren(true);
 		/////////////////////////////
 		// 2. add a menu item with "X" image, which is clicked to quit the program
@@ -105,40 +164,44 @@ var gamescene =cc.Layer.extend({
 		// ask director the window size
 		this.menu=cc.Menu.create();
 		var size = cc.Director.getInstance().getWinSize();
-		var lazyLayer = new cc.LazyLayer();
-		this.addChild(lazyLayer);
-		this.backgroud = new backSprite(size);
+		var boardsize=cc.size(size.width*0.8,size.width*0.8);
+		//绘制棋盘
+		this.board = cc.Layer.create();
+		this.board.setAnchorPoint(cc.p(0.5,0.5));
+		this.board.setContentSize(boardsize);
+		this.backgroud = new backSprite(boardsize);
+		this.backgroud.setAnchorPoint(cc.p(0.5,0.5));
+		this.board.setPosition(size.width/2-boardsize.width/2,size.height*0.9-boardsize.height);
 		labeltop=new Array();
 		labelleft=new Array();
 		labelright=new Array();
 		labelbottom=new Array();
-		
-		
-		this.addChild(this.backgroud,0);
+		this.scorelayers=new Array();
+		this.board.addChild(this.backgroud,0);
+		this.addChild(this.board);
 		for(var i=0;i<9;i++){
-			labeltop[i]=cc.LabelTTF.create(i+1, "Black", 45);
-			this.addChild(labeltop[i]);
-			labeltop[i].setPosition(cc.p(size.width/22*(i*2+3),size.height-size.width/22));
-			labelbottom[i]=cc.LabelTTF.create(i+1, "Arial", 45);
-			this.addChild(labelbottom[i]);
-			labelbottom[i].setPosition(cc.p(size.width/22*(i*2+3),size.height-size.width/22*21));
-			labelleft[i]=cc.LabelTTF.create(labeltext[i], "Arial", 45);
-			this.addChild(labelleft[i]);
-			labelleft[i].setPosition(cc.p(size.width/22,size.height-size.width/22*(i*2+3)));
-			labelright[i]=cc.LabelTTF.create(labeltext[i], "Arial", 45);
-			this.addChild(labelright[i]);
-			labelright[i].setPosition(cc.p(size.width/22*21,size.height-size.width/22*(i*2+3)));
-			
-		
+			labeltop[i]=cc.LabelTTF.create(i+1, "Black", fontsize);
+			this.board.addChild(labeltop[i]);
+			labeltop[i].setPosition(cc.p(boardsize.width/22*(i*2+3),boardsize.height-boardsize.width/22));
+			labelbottom[i]=cc.LabelTTF.create(i+1, "Arial", fontsize);
+			this.board.addChild(labelbottom[i]);
+			labelbottom[i].setPosition(cc.p(boardsize.width/22*(i*2+3),boardsize.height-boardsize.width/22*21));
+			labelleft[i]=cc.LabelTTF.create(labeltext[i], "Arial", fontsize);
+			this.board.addChild(labelleft[i]);
+			labelleft[i].setPosition(cc.p(boardsize.width/22,boardsize.height-boardsize.width/22*(i*2+3)));
+			labelright[i]=cc.LabelTTF.create(labeltext[i], "Arial", fontsize);
+			this.board.addChild(labelright[i]);
+			labelright[i].setPosition(cc.p(boardsize.width/22*21,boardsize.height-boardsize.width/22*(i*2+3)));
 		}
+		//绘制和生成棋盘单元格
 		var cell=new Array();
 		for(var i=0;i<9;i++){
 			cell[i]=new Array();
 			for(var j=0;j<9;j++){
 				var celltype=Math.floor(i/3)+Math.floor(j/3)*3;
-				cell[i][j]=new cellitem(labelsymbolcover[celltype]);
+				cell[i][j]=new cellitem(labelsymbolcover[celltype],boardsize);
 				this.menu.addChild(cell[i][j]);
-				cell[i][j].setPosition(cc.p(size.width/22*(i*2+3),size.height-size.width/22*(j*2+3)));
+				cell[i][j].setPosition(cc.p(boardsize.width/22*(i*2+3),boardsize.height-boardsize.width/22*(j*2+3)));
 				cell[i][j].setTarget(cell[i][j]);
 				cell[i][j].setCallback(
 					function()
@@ -149,10 +212,44 @@ var gamescene =cc.Layer.extend({
 			}
 		
 		}
-		this.addChild(this.menu);
+		this.board.addChild(this.menu);
+		this.myblockscard=new Array();
+		var playerUI=cc.Layer.create();
+		for(var i=0;i<5;i++){
+			this.myblockscard[i]=new cellitem(labelsymbol[Math.floor(Math.random()*9)],size);
+			this.myblockscard[i].changeicon(1,this.myblockscard[i].labelstr);
+			playerUI.addChild(this.myblockscard[i]);
+			this.myblockscard[i].setPosition(cc.p(size.width/22*(i*2+7),size.height*0.3));
+			this.myblockscard[i].setTarget(this.myblockscard[i]);
+			this.myblockscard[i].setCallback(
+				function(){
+				}
+			);
+			var remaincard=23;
+			this.remainblocks=cc.LabelTTF.create("■×"+remaincard, "Black", fontsize);
+			this.remainblocks.setColor(get_player_color(1));
+			playerUI.addChild(this.remainblocks);
+			this.remainblocks.setPosition(cc.p(size.width/2,size.height*0.2))
+		
+		}
+		this.addChild(playerUI);
+		
+		//绘制其他玩家分数区域
+		var j=0;
+		
+		for(var i=2;i<=playnums;i++){
+			this.scorelayers[i]=new scorelayer(cc.size(size.width*0.25,size.height*0.1),i);
+			this.addChild(this.scorelayers[i],100);
+			this.scorelayers[i].setPosition(cc.p(j*size.width*0.25,size.height*0.9));
+			j++;
+			
+		
+		
+		}
 		this.menu.setPosition(0,0);
 		this.menu.setEnabled(true);
 		this.backgroud.setPosition(cc.p(0, 0));
+		//绘制自己的手牌区域
 		this.adjustSizeForWindow();
 		window.addEventListener("resize", function (event) {
             selfPointer.adjustSizeForWindow();
