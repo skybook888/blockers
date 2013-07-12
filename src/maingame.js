@@ -230,6 +230,7 @@ var gamescene =cc.Layer.extend({
 						console.log(parent);
 						parent.game.putblock(this.player,this.labelstr,this.x,this.y);
 						parent.refreshscore();
+						return;
 					 });
 			}
 		

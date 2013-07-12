@@ -106,6 +106,8 @@ function gamelogic(){
 									}
 									scorelist[p]=scorelist[p].concat(scorelist[q]);
 									scorelist[q]=new Array();
+									scorelist[p].push(j+i*9);
+									blockarr[j+i*9]=p;
 									l--;
 								}	
 							}else{
