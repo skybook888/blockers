@@ -39,7 +39,8 @@
         appFiles:[
             'src/resource.js',
             'src/maingame.js',//add your own files in order here
-            'src/intro.js'
+            'src/intro.js',
+            'src/gamelogic.js'
         ]
     };
     window.addEventListener('DOMContentLoaded', function () {

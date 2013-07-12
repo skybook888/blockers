@@ -59,6 +59,12 @@ var scorelayer= cc.Layer.extend({
 		this.addChild(this.blocks);
 		this.blocks.setPosition(size.width*0.85,size.height*0.75);
 	},
+	setblock:function(num){
+		this.blocks.setString(num);
+	},
+	setscore:function(num){
+		this.score.setString(num);
+	},
 	draw:function(){
 		cc.renderContext.fillStyle = "rgba(255,255,255,255)";
         cc.renderContext.strokeStyle = "rgba(255,255,255,255)";
@@ -118,11 +124,15 @@ var blocksprite = cc.Sprite.extend({
 	}
 });
 var cellitem= cc.MenuItemSprite.extend({
+	x:0,
+	y:0,
 	player:0,
 	sprite:null,
-	labstr:"",
-	ctor:function(labelstr,size){
+	labelstr:"",
+	ctor:function(labelstr,size,x,y){
 		this._super;
+		this.x=x;
+		this.y=y;
 		this.setAnchorPoint(cc.p(0.5,0.5));
 		this.sprite=new blocksprite(labelstr,0,size);
 		this.setNormalImage(this.sprite);
@@ -134,6 +144,8 @@ var cellitem= cc.MenuItemSprite.extend({
 	changeicon:function(player,labelstr){
 		this.sprite.setcolor(player);
 		this.sprite.setstring(labelstr);
+		this.player=player;
+		this.labelstr=labelstr;
 	
 	}
 	
@@ -151,17 +163,23 @@ var gamescene =cc.Layer.extend({
 	scorelayers:null,
 	myblockscard:null,
 	remainblocks:null,
+	game:null,
+	labplayerscore:null,
+	playernums:0,
 	init:function (playnums) {
 		var selfPointer = this;
 		//////////////////////////////
 		// 1. super init first
 		this._super();
+		this.playernums=playnums;
 		//this.setAnchorPoint(cc.PointMake(0.5,0.5));
 		this.removeAllChildren(true);
 		/////////////////////////////
 		// 2. add a menu item with "X" image, which is clicked to quit the program
 		//	you may modify it.
 		// ask director the window size
+		this.game=new gamelogic();
+		this.game.init(playnums)
 		this.menu=cc.Menu.create();
 		var size = cc.Director.getInstance().getWinSize();
 		var boardsize=cc.size(size.width*0.8,size.width*0.8);
@@ -199,20 +217,25 @@ var gamescene =cc.Layer.extend({
 			cell[i]=new Array();
 			for(var j=0;j<9;j++){
 				var celltype=Math.floor(i/3)+Math.floor(j/3)*3;
-				cell[i][j]=new cellitem(labelsymbolcover[celltype],boardsize);
+				cell[i][j]=new cellitem(labelsymbolcover[celltype],boardsize,i,j);
 				this.menu.addChild(cell[i][j]);
 				cell[i][j].setPosition(cc.p(boardsize.width/22*(i*2+3),boardsize.height-boardsize.width/22*(j*2+3)));
 				cell[i][j].setTarget(cell[i][j]);
 				cell[i][j].setCallback(
 					function()
 					{
-						console.log(true);
+						
 						this.changeicon(Math.floor(Math.random()*5)+1,labelsymbol[Math.floor(Math.random()*9)]);
+						var parent=this.getParent().getParent().getParent();
+						console.log(parent);
+						parent.game.putblock(this.player,this.labelstr,this.x,this.y);
+						parent.refreshscore();
 					 });
 			}
 		
 		}
 		this.board.addChild(this.menu);
+		//绘制自己的手牌区域
 		this.myblockscard=new Array();
 		var playerUI=cc.Layer.create();
 		for(var i=0;i<5;i++){
@@ -225,13 +248,20 @@ var gamescene =cc.Layer.extend({
 				function(){
 				}
 			);
-			var remaincard=23;
-			this.remainblocks=cc.LabelTTF.create("■×"+remaincard, "Black", fontsize);
-			this.remainblocks.setColor(get_player_color(1));
-			playerUI.addChild(this.remainblocks);
-			this.remainblocks.setPosition(cc.p(size.width/2,size.height*0.2))
+			
+			
 		
 		}
+		var remaincard=23;
+		this.remainblocks=cc.LabelTTF.create("■×"+remaincard, "Black", fontsize);
+		this.remainblocks.setColor(get_player_color(1));
+		playerUI.addChild(this.remainblocks);
+		this.remainblocks.setPosition(cc.p(size.width/2,size.height*0.2));
+		this.labplayerscore=cc.LabelTTF.create("score:0", "Black", fontsize);
+		this.labplayerscore.setColor(get_player_color(1));
+		playerUI.addChild(this.labplayerscore);
+		this.labplayerscore.setPosition(cc.p(size.width/2,size.height*0.1));
+		
 		this.addChild(playerUI);
 		
 		//绘制其他玩家分数区域
@@ -249,12 +279,26 @@ var gamescene =cc.Layer.extend({
 		this.menu.setPosition(0,0);
 		this.menu.setEnabled(true);
 		this.backgroud.setPosition(cc.p(0, 0));
-		//绘制自己的手牌区域
 		this.adjustSizeForWindow();
 		window.addEventListener("resize", function (event) {
             selfPointer.adjustSizeForWindow();
         });
         return true;
+	},
+	refreshscore:function(){
+		var score=this.game.getallscore();
+		console.log(score);
+		for(var i=1;i<=this.playernums;i++){
+			if(i==1){
+				this.labplayerscore.setString("score:"+score[i]);
+			}else{
+				this.scorelayers[i].setscore(score[i]);
+				this.scorelayers[i].setblock(score[i]);
+			}
+		
+		
+		}
+	
 	},
 	adjustSizeForWindow:function () {
 		var margin = document.documentElement.clientWidth - document.body.clientWidth;
