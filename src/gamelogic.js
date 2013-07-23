@@ -5,7 +5,7 @@ function gamelogic(){
 	var gamecard=new Array("1","2","3","4","5","6","7","8","9","A","B","C","D","E","F","G","H","I","★","♣","♥","♦","♠","☀","▲","●","■","♂");
 	var turn=0;
 	var playernums=0;
-	var playlist;
+	var startplayer=0;
 	this.init=function(nums){
 		turn=0;
 		playernums=nums;
@@ -19,9 +19,8 @@ function gamelogic(){
 			
 			}
 		}
-		playlist=new Array();
+		startplayer=1+Math.floor(Math.random()*5);
 		for(i=1;i<=nums;i++){
-			playlist.push(i);
 			playercardqueuearr[i]=gamecard.slice(0);
 			playercardqueuearr[i].sort(randomsort);
 			playercardhandarr[i]=new Array();
@@ -35,16 +34,18 @@ function gamelogic(){
 			//console.log(playercardqueuearr[i]);
 			//console.log(playercardhandarr[i]);
 		}
-		playlist.sort(randomsort);
+		//playlist.sort(randomsort);
 		
 		
 	};
-	this.getplayercolor=function(){
-		return(playlist[0]);
+	this.getplayercolor=function(i){
+		var pcolor=startplayer+i;
+		if(pcolor>5)pcolor=pcolor-5;
+		return(pcolor);
 	};
 	
 	this.getplayercard=function(player){
-		return 	playercardqueuearr[player-1];
+		return 	playercardqueuearr[player];
 	};
 	this.putblock=function(player,symbol,x,y){
 		cellarr[x][y].player=player;
@@ -161,4 +162,3 @@ function cellblock(){
 function randomsort(a, b) {
 return Math.random()>.5 ? -1 : 1;//用Math.random()函数生成0~1之间的随机数与0.5比较，返回-1或1
 }
-function computerai

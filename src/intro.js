@@ -1,6 +1,6 @@
-var colorr=new Array(0,255,0,0,255,0,255);
-var colorg=new Array(0,0,255,0,0,255,255);
-var colorb=new Array(0,0,0,255,255,255,0);
+var colorr=new Array(0,255,0,0,255,0,255,255);
+var colorg=new Array(0,0,255,0,0,255,255,255);
+var colorb=new Array(0,0,0,255,255,255,0,255);
 var fontsize=28;
 var labeltext=new Array("A","B","C","D","E","F","G","H","I");
 var labelsymbol=new Array("★","♣","♥","♦","♠","☀","▲","●","■");

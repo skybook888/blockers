@@ -129,6 +129,10 @@ var cellitem= cc.MenuItemSprite.extend({
 	player:0,
 	sprite:null,
 	labelstr:"",
+	selectedeffect1:null,
+	selectedeffect2:null,
+	
+	isselected:false,
 	ctor:function(labelstr,size,x,y){
 		this._super;
 		this.x=x;
@@ -147,7 +151,55 @@ var cellitem= cc.MenuItemSprite.extend({
 		this.player=player;
 		this.labelstr=labelstr;
 	
-	}
+	},
+	setselected:function(){
+		if(this.isselected){
+			
+		}else{
+			//console.log(1);
+			this.selectedeffect1= cc.ParticleSystem.create("resources/selected.plist");
+			this.selectedeffect1.setShapeType(cc.PARTICLE_STAR_SHAPE);
+			this.sprite.addChild(this.selectedeffect1,100);
+			var size =this.sprite.colorlayer.getContentSize();
+			console.log(size);
+			this.selectedeffect1.setPosition(cc.p(0,0));
+			this.selectedeffect1.runAction(
+				cc.RepeatForever.create(
+					cc.Sequence.create(
+						cc.MoveTo.create(0.5,cc.p(0,size.height)),
+						cc.MoveTo.create(0.5,cc.p(size.width,size.height)),
+						cc.MoveTo.create(0.5,cc.p(size.width,0)),
+						cc.MoveTo.create(0.5,cc.p(0,0))
+					)
+				)
+			);
+			this.selectedeffect2= cc.ParticleSystem.create("resources/selected.plist");
+			this.selectedeffect2.setShapeType(cc.PARTICLE_STAR_SHAPE);
+			this.sprite.addChild(this.selectedeffect2,100);
+			this.selectedeffect2.setPosition(cc.p(size.width,size.height));
+			this.selectedeffect2.runAction(
+				cc.RepeatForever.create(
+					cc.Sequence.create(
+						cc.MoveTo.create(0.5,cc.p(size.width,0)),
+						cc.MoveTo.create(0.5,cc.p(0,0)),
+						cc.MoveTo.create(0.5,cc.p(0,size.height)),
+						cc.MoveTo.create(0.5,cc.p(size.width,size.height))
+						
+					)
+				)
+			);
+			this.isselected=!this.isselected;
+		}
+	},
+	unsetselected:function(){
+		if(this.isselected){
+			this.selectedeffect1.removeFromParent(true);
+			this.selectedeffect2.removeFromParent(true);
+			this.isselected=!this.isselected;
+		}else{
+			
+		}
+	}	
 	
 
 
@@ -159,6 +211,7 @@ var gamescene =cc.Layer.extend({
 	castle:null,
 	logo:null,
 	menu:null,
+	cardmenu:null,
 	board:null,
 	scorelayers:null,
 	myblockscard:null,
@@ -166,6 +219,8 @@ var gamescene =cc.Layer.extend({
 	game:null,
 	labplayerscore:null,
 	playernums:0,
+	playerorder:0,
+	handcards:null,
 	init:function (playnums) {
 		var selfPointer = this;
 		//////////////////////////////
@@ -237,29 +292,46 @@ var gamescene =cc.Layer.extend({
 		}
 		this.board.addChild(this.menu);
 		//绘制自己的手牌区域
+		
 		this.myblockscard=new Array();
 		var playerUI=cc.Layer.create();
+		this.playerorder=this.game.getplayercolor(1);
+		console.log(this.playerorder);
+		this.handcards=this.game.getplayercard(this.playerorder);
+		
+		this.cardmenu=cc.Menu.create();
+		this.cardmenu.setPosition(cc.p(0,0));
+		playerUI.addChild(this.cardmenu);
+		this.cardmenu.setAnchorPoint(cc.p(0,0));
 		for(var i=0;i<5;i++){
-			this.myblockscard[i]=new cellitem(labelsymbol[Math.floor(Math.random()*9)],size);
-			this.myblockscard[i].changeicon(1,this.myblockscard[i].labelstr);
-			playerUI.addChild(this.myblockscard[i]);
+			
+			this.myblockscard[i]=new cellitem(this.handcards[i],cc.size(size.width*0.9,size.height*0.9));
+			this.myblockscard[i].changeicon(this.playerorder,this.myblockscard[i].labelstr);
+			this.cardmenu.addChild(this.myblockscard[i]);
 			this.myblockscard[i].setPosition(cc.p(size.width/22*(i*2+7),size.height*0.3));
 			this.myblockscard[i].setTarget(this.myblockscard[i]);
 			this.myblockscard[i].setCallback(
 				function(){
-				}
-			);
+					var par=this.getParent().getParent().getParent();
+					for(var i=0;i<5;i++){
+						par.myblockscard[i].unsetselected();
+					}
+					this.setselected();
+					
+					return;
+					
+				});
 			
 			
 		
 		}
 		var remaincard=23;
 		this.remainblocks=cc.LabelTTF.create("■×"+remaincard, "Black", fontsize);
-		this.remainblocks.setColor(get_player_color(1));
+		this.remainblocks.setColor(get_player_color(this.playerorder));
 		playerUI.addChild(this.remainblocks);
 		this.remainblocks.setPosition(cc.p(size.width/2,size.height*0.2));
 		this.labplayerscore=cc.LabelTTF.create("score:0", "Black", fontsize);
-		this.labplayerscore.setColor(get_player_color(1));
+		this.labplayerscore.setColor(get_player_color(this.playerorder));
 		playerUI.addChild(this.labplayerscore);
 		this.labplayerscore.setPosition(cc.p(size.width/2,size.height*0.1));
 		
@@ -267,9 +339,10 @@ var gamescene =cc.Layer.extend({
 		
 		//绘制其他玩家分数区域
 		var j=0;
-		
+		var playerorder=new Array();
 		for(var i=2;i<=playnums;i++){
-			this.scorelayers[i]=new scorelayer(cc.size(size.width*0.25,size.height*0.1),i);
+			playerorder[i]=this.game.getplayercolor(i);
+			this.scorelayers[i]=new scorelayer(cc.size(size.width*0.25,size.height*0.1),playerorder[i]);
 			this.addChild(this.scorelayers[i],100);
 			this.scorelayers[i].setPosition(cc.p(j*size.width*0.25,size.height*0.9));
 			j++;
@@ -286,15 +359,16 @@ var gamescene =cc.Layer.extend({
         });
         return true;
 	},
+	//刷新分数版
 	refreshscore:function(){
 		var score=this.game.getallscore();
 		console.log(score);
 		for(var i=1;i<=this.playernums;i++){
 			if(i==1){
-				this.labplayerscore.setString("score:"+score[i]);
+				this.labplayerscore.setString("score:"+score[this.game.getplayercolor(i)]);
 			}else{
-				this.scorelayers[i].setscore(score[i]);
-				this.scorelayers[i].setblock(score[i]);
+				this.scorelayers[i].setscore(score[this.game.getplayercolor(i)]);
+				this.scorelayers[i].setblock(score[this.game.getplayercolor(i)]);
 			}
 		
 		
