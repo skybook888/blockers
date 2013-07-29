@@ -221,6 +221,8 @@ var gamescene =cc.Layer.extend({
 	playernums:0,
 	playerorder:0,
 	handcards:null,
+	selectedCardIndex:-1,
+	sizeglboal:null,
 	init:function (playnums) {
 		var selfPointer = this;
 		//////////////////////////////
@@ -280,10 +282,74 @@ var gamescene =cc.Layer.extend({
 					function()
 					{
 						
-						this.changeicon(Math.floor(Math.random()*5)+1,labelsymbol[Math.floor(Math.random()*9)]);
+						///this.changeicon(Math.floor(Math.random()*5)+1,labelsymbol[Math.floor(Math.random()*9)]);
 						var parent=this.getParent().getParent().getParent();
-						console.log(parent);
-						parent.game.putblock(this.player,this.labelstr,this.x,this.y);
+						//console.log(parent);
+						if(parent.selectedCardIndex>=0){
+							if(parent.game.putblock(parent.playerorder,parent.myblockscard[parent.selectedCardIndex].labelstr,this.x,this.y)){
+								boradpos= parent.board.getPosition();
+								cellpos= this.getPosition();
+								parent.myblockscard[parent.selectedCardIndex].runAction(
+									cc.Sequence.create(
+										cc.MoveTo.create(0.5,cc.p(boradpos.x+cellpos.x,boradpos.y+cellpos.y)),
+										cc.CallFunc.create(
+											function(a,p){
+												console.log(p);
+												this.changeicon(p.playerorder,p.myblockscard[p.selectedCardIndex].labelstr);
+											},
+											this,
+											parent
+											
+																						
+										),
+										
+										cc.CallFunc.create(
+											function(){
+												var size = cc.Director.getInstance().getWinSize();
+												this.myblockscard[this.selectedCardIndex].removeFromParent(true);
+												this.myblockscard.remove(parent.selectedCardIndex);
+												this.selectedCardIndex=-1;
+												this.handcards=this.game.getplayercard(this.playerorder);
+												this.myblockscard.push(new cellitem(this.handcards[4],cc.size(size.width*0.9,size.height*0.9)));
+												this.myblockscard[4].changeicon(this.playerorder,this.myblockscard[4].labelstr);
+												this.myblockscard[4].setPosition(cc.p(size.width/2,size.height*0.2));
+												this.cardmenu.addChild(this.myblockscard[4]);
+												console.log(this.myblockscard);
+												this.myblockscard[4].setCallback(
+													function(){
+														var par=this.getParent().getParent().getParent();
+														for(var i=0;i<par.myblockscard.length;i++){
+															if(par.myblockscard[i]==this){
+																
+																this.setselected();
+																par.selectedCardIndex=i;
+															}
+															else par.myblockscard[i].unsetselected();
+														}
+														return;
+														
+													});	
+												for(var i=0;i<this.myblockscard.length;i++){
+													
+													var movea=cc.MoveTo.create(0.5,cc.p(size.width/22*(i*2+7),size.height*0.3));
+													this.myblockscard[i].runAction(movea);
+													
+												}
+												var rcn=this.game.getplayeremianrcard(this.playerorder);
+												this.remainblocks.setString("■×"+rcn);
+													
+												
+											},
+											parent
+										)
+										
+										
+									)
+								);
+						
+						
+							}
+						}
 						parent.refreshscore();
 						return;
 					 });
@@ -313,10 +379,16 @@ var gamescene =cc.Layer.extend({
 			this.myblockscard[i].setCallback(
 				function(){
 					var par=this.getParent().getParent().getParent();
-					for(var i=0;i<5;i++){
-						par.myblockscard[i].unsetselected();
+					for(var i=0;i<par.myblockscard.length;i++){
+						if(par.myblockscard[i]==this){
+							
+							this.setselected();
+							par.selectedCardIndex=i;
+						}
+						else par.myblockscard[i].unsetselected();
 					}
-					this.setselected();
+					
+					
 					
 					return;
 					
