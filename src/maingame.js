@@ -286,7 +286,7 @@ var gamescene =cc.Layer.extend({
 						var parent=this.getParent().getParent().getParent();
 						//console.log(parent);
 						if(parent.selectedCardIndex>=0){
-							if(parent.game.putblock(parent.playerorder,parent.myblockscard[parent.selectedCardIndex].labelstr,this.x,this.y)){
+							if(parent.game.putblock(parent.playerorder,parent.selectedCardIndex,this.x,this.y)>0){
 								boradpos= parent.board.getPosition();
 								cellpos= this.getPosition();
 								parent.myblockscard[parent.selectedCardIndex].runAction(

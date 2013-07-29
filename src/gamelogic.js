@@ -45,7 +45,7 @@ function gamelogic(){
 	};
 	
 	this.getplayercard=function(player){
-		return 	playercardqueuearr[player];
+		return 	playercardhandarr[player];
 	};
 	this.getplayeremianrcard=function(player){
 		return 	playercardqueuearr[player].length;
@@ -56,8 +56,7 @@ function gamelogic(){
 		cellarr[x][y].blocker=playercardhandarr[player][num];
 		playercardhandarr[player].remove(num);
 		playercardhandarr[player].push(playercardqueuearr[player].shift());
-		
-		console.log(cellarr[x][y]);
+		console.log(playercardhandarr[player]);
 		return 1;
 	};
 	this.calcBlocksNums=function(player){
@@ -171,23 +170,22 @@ function randomsort(a, b) {
 return Math.random()>.5 ? -1 : 1;//用Math.random()函数生成0~1之间的随机数与0.5比较，返回-1或1
 }
 Array.prototype.remove = function(dx) {
-
+	console.log(dx);
     if (isNaN(dx) || dx > this.length) {
 
         return false;
 
     }
-
+	
     for (var i = 0, n = 0; i < this.length; i++) {
 
         if (this[i] != this[dx]) {
-
-            this[n++] = this[i]
+			this[n++] = this[i]
 
         }
 
     }
 
-    this.length -= 1
-
+    this.pop();
+    console.log(this);
 }
